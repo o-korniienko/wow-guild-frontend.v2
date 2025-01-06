@@ -1,0 +1,47 @@
+.site-page-header {
+  border: 3px solid rgb(0, 0, 0);
+  background-color:#fef6d2;
+  font-family: "Trebuchet MS";
+}
+
+.logo{
+    text-shadow:darkred #795548;
+    color:#248755;
+    font-size:35px;
+    font-family:'Morpheus';
+    white-space: pre-line;
+
+}
+
+.logo:hover {
+cursor: pointer;
+color:#607d8b;
+}
+
+.ant-btn-primary:hover {
+    color: #54b1ed;
+}
+
+.language_selector{
+    position:'relative';
+    right:5%;
+    top:25%;
+    color:#63baf2;
+    border: 3px solid rgb(21, 21, 21) !important;
+    background-color:rgb(21, 21, 21) !important;
+
+}
+
+.ant-select-selection-item{
+     background-color:transparent;
+}
+
+.ant-select-selector{
+    border: transparent !important;
+    background-color:transparent !important;
+}
+
+
+
+
+

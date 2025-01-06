@@ -1,0 +1,16 @@
+html, body {
+ background-color:white;
+}
+
+.greeting_form{
+    position:relative;
+    width:100%;
+    margin-top:5%;
+}
+
+.greeting_text{
+    color:#cd641b;
+    font-size:500%;
+    font-family:'Morpheus';
+}
+

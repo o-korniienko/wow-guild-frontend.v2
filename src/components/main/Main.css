@@ -1,0 +1,25 @@
+.about_section, .general_section, .contacts_section{
+    text-align:left;
+    font-family:"Trebuchet MS";
+    font-size:18px;
+    color: #032313;
+    white-space: pre-line;
+
+}
+
+.save_btn{
+    color:darkgreen;
+}
+
+.edit_btn, .save_btn, .close_btn :hover{
+    cursor: pointer;
+}
+
+.edit_btn{
+    color:#54b1ed;
+
+}
+
+.close_btn{
+    color:red;
+}

@@ -1,0 +1,49 @@
+.main_div_disabled{
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.main_div_enabled{
+
+}
+
+.rows{
+    background-color:black;
+    color:#aec9bc
+}
+
+.ant-table-tbody > tr.ant-table-row:hover > td {
+  background-color:#464646;
+
+}
+
+.ant-table-thead > tr >th{
+  background-color: #aec9bc ;
+}
+
+td.ant-table-column-sort {
+ background-color:#464646;
+}
+
+.ant-select-selection-item{
+     background-color:transparent;
+
+}
+
+.ant-select-selector{
+    border: transparent !important;
+    background-color:transparent !important;
+
+}
+
+.custom_selector{
+    color:#black;
+    border: 1px solid rgb(21, 21, 21) !important;
+    background-color:#aec9bc !important;
+    font-family: "Trebuchet MS";
+    border-radius: 25px
+
+}
+
+
+
