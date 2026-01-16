@@ -30,6 +30,7 @@
   align-self: flex-end;
   text-align: right;
   margin-left: auto;
+  flex-direction: row-reverse;
 }
 
 .chat-message.other {
@@ -66,4 +67,36 @@
 
 .chat-input button:hover {
   background-color: #0056b3;
+}
+.chat-message {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* OTHER USER → username on the LEFT */
+.chat-message.other {
+  justify-content: flex-start;
+}
+
+.chat-message.other .chat-username {
+  color: black;
+  margin-right: 8px;
+}
+
+.chat-message.user .chat-username {
+  color: #2196f3;
+  margin-left: 8px;
+}
+
+/* Common styling */
+.chat-username {
+  font-weight: bold;
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.chat-text {
+  padding: 6px 10px;
+  border-radius: 8px;
 }

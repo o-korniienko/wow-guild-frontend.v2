@@ -25,10 +25,10 @@ const SimpleChat =  () =>{
 
     const handleSend = () => {
       if (input.trim() !== '') {
-
-        var newMessage = {
+        let newMessage = {
             message: input,
-            userId: user.id
+            userId: user.id,
+            userName: user.username
         }
         fetch('/simple-chat/message/send', {
             method: 'POST',
@@ -48,10 +48,11 @@ const SimpleChat =  () =>{
 
     const processMessageSendResponse = (data) => {
         if(data !== null && data !== undefined && data.status === 200){
-            var messageItem = {
+            let messageItem = {
                 id:data.data.id,
                 text:data.data.message,
-                sender:'user'
+                sender:'user',
+                userName: data.data.userName
             }
             setMessages(prevMessages => [...prevMessages, messageItem])
             setInput('')
@@ -64,15 +65,16 @@ const SimpleChat =  () =>{
       }
     };
 
-    const processWbeSocketMessage = (message) =>{
+    const processWebSocketMessage = (message) =>{
         if (message.body) {
             if(message.body !== null && message.body !== undefined){
-              var newMessage = JSON.parse(message.body)
+                let newMessage = JSON.parse(message.body)
               if(newMessage !== undefined && newMessage.data.userId.toString() !== user.id.toString()){
-                  var messageItem = {
+                  let messageItem = {
                       id:newMessage.data.id,
                       text: newMessage.data.message,
-                      sender: 'other'
+                      sender: 'other',
+                      userName: newMessage.data.userName
                   }
                   setMessages(prevMessages => [...prevMessages, messageItem])
               }
@@ -96,9 +98,8 @@ const SimpleChat =  () =>{
             const socket = new SockJS('/simple_chat_web_socket');
             const stompClient = Stomp.over(socket);
             stompClient.connect({}, (frame) => {
-                console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/simple_chat_message', (message) => {
-                    processWbeSocketMessage(message);
+                    processWebSocketMessage(message);
                 });
             }, (error) => {
                 console.error('Connection error:', error);
@@ -125,12 +126,13 @@ const SimpleChat =  () =>{
 
     const setMessagesData = (data, user) => {
         if(data !== null && data.length > 0 && user !== null){
-            var messageItems = []
-            for(var i = 0; i < data.length; i++){
-                var message = {
+            let messageItems = []
+            for(let i = 0; i < data.length; i++){
+                let message = {
                     id:data[i].id,
                     text: data[i].message,
-                    sender: data[i].userId.toString() === user.id.toString() ? 'user' : 'other'
+                    sender: data[i].userId.toString() === user.id.toString() ? 'user' : 'other',
+                    userName: data[i].userName
                 }
                 messageItems.push(message)
             }
@@ -148,7 +150,12 @@ const SimpleChat =  () =>{
                         key={index}
                         className={`chat-message ${message.sender === 'user' ? 'user' : 'other'}`}
                       >
-                        {message.text}
+                            <span className="chat-username">
+                              [{message.userName}]
+                            </span>
+                            <span className="chat-text">
+                              {message.text}
+                            </span>
                       </div>
                     ))}
                   </div>
