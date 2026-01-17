@@ -40,7 +40,7 @@ const tailLayout = {
 const LoginForm = (props) => {
     const [form] = Form.useForm();
 
-    const onFinish = (values: any) => {
+    const onFinish = (values) => {
         let username = values.username;
         let password = values.password;
 

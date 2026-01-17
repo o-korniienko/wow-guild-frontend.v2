@@ -50,7 +50,7 @@ const RegistrationForm = (props) => {
     const [form] = Form.useForm();
 
 
-    const onFinish = (values: any) => {
+    const onFinish = (values) => {
         let username = values.username;
         let password = values.password;
         let language = localStorage.getItem("language");
@@ -60,7 +60,6 @@ const RegistrationForm = (props) => {
             pass:password,
             language:language
         }
-
         fetch('/user/registration', {
             method: 'POST',
             mode: 'cors',
@@ -69,7 +68,7 @@ const RegistrationForm = (props) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(user)
-        }).then(response => response.status != 200 ? showError(response) :
+        }).then(response => response.status !== 200 ? showError(response) :
             response.json())
             .then(data => processRegistrationApiResponse(data, props.currentLanguage));
     }

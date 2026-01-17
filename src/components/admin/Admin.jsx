@@ -3,7 +3,7 @@ import {Button, Col, Input, Layout, message, Popconfirm, Row, Space, Table, Tag}
 import 'antd/dist/antd.css';
 import React, {useEffect, useState} from 'react';
 import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
-import { useCookies } from 'react-cookie';
+import {useCookies} from 'react-cookie';
 import {Link} from 'react-router-dom';
 import {showError} from './../../common/error-handler.jsx';
 
@@ -64,12 +64,12 @@ const UserList = (props) => {
     }
 
     const updateUsers = (data) => {
-        if(data !== null && data !== undefined){
-            if (data.message === 'Deleted'){
+        if (data !== null && data !== undefined) {
+            if (data.message === 'Deleted') {
                 message.success(data.message)
                 setUsers(data.data);
                 Users = data.data;
-            }else{
+            } else {
                 message.error(data.message)
             }
         }
@@ -82,7 +82,7 @@ const UserList = (props) => {
 
     useEffect(() => {
         resolveCSRFToken()
-                    .then(token => setCookie('csrf', token, { path: '/' }))
+            .then(token => setCookie('csrf', token, {path: '/'}))
 
         fetch('/user/get-all', {})
             .then(response => response.status != 200 ? showError(response) : response.json())
@@ -90,25 +90,22 @@ const UserList = (props) => {
 
     }, []);
     const remove = (id) => {
-        fetch("/csrf")
-            .then(response => response.status != 200 ? showError(response) :
-                response.json())
-            .then(data => {
-                if (data !== undefined && data !== null && data.token != undefined) {
-                    fetch('/user/delete-one/' + id, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-XSRF-TOKEN': data.token,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include',
+        resolveCSRFToken().then(token => {
+            if (token !== undefined && token !== null) {
+                fetch('/user/delete-one/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-XSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
 
-                    })
-                        .then(response => response.status != 200 ? showError(response) : response.json())
-                        .then(data => updateUsers(data));
-                }
-            });
+                })
+                    .then(response => response.status != 200 ? showError(response) : response.json())
+                    .then(data => updateUsers(data));
+            }
+        });
 
     };
 

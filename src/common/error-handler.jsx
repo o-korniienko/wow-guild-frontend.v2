@@ -9,7 +9,7 @@ export const showError = (response) => {
 }
 
 export const showErrorAndSetFalse = (response, setSending) => {
-    if (setSending != null && setSending != undefined) {
+    if (setSending !== null && setSending !== undefined) {
         setSending(false);
     }
     response.text().then(errorMessage => {
