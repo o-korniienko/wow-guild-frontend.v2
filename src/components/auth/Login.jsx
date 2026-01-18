@@ -6,25 +6,27 @@ import Cookies from 'universal-cookie';
 import {Link} from 'react-router-dom';
 import './Auth.css';
 import {showError} from './../../common/error-handler.jsx';
+import {API_BASE_URL} from "../../constants/apiConstants";
+import {USER_LOGIN_FAIL_MSG, USER_LOGIN_RESULT_MSG_C, USER_LOGIN_SUCCESS_MSG} from "../../constants/cookiesConstants";
 
 
 const cookies = new Cookies();
 let language = localStorage.getItem("language") != null ? localStorage.getItem("language") : "EN";
 
-const getLogin = (data, language) => {
-    let mess = cookies.get("message");
-    if (mess === "DoesNotExist" || mess === "WrongPassword") {
-        if (language == "UA") {
-            message.warning("Логін і пароль не збігаються з жодним з користувачів");
+const proccessLoginResult = (data, language) => {
+    let mess = data.message
+    if (mess === USER_LOGIN_FAIL_MSG) {
+        if (language === "UA") {
+            message.warning("Не вірний логін або пароль");
         }
-        if (language == "EN") {
-            message.warning("UserName and Password do not match any of users");
+        if (language === "EN") {
+            message.warning("Invalid username or password");
         }
     } else {
-        if (mess === "Successful") {
+        if (mess === USER_LOGIN_SUCCESS_MSG) {
             window.location.href = "/home";
         }else{
-            message.error("unknown error has been occured")
+            message.error("unknown login result")
         }
     }
 }
@@ -44,11 +46,13 @@ const LoginForm = (props) => {
         let username = values.username;
         let password = values.password;
 
-        fetch('/perform_login?username=' + username + '&password=' + password, {
+        fetch(API_BASE_URL +'/perform_login?username=' + username + '&password=' + password, {
             method: 'POST',
-            mode: 'cors'
-        }).then(response => response.status !== 200 && response.status !== 401 ? showError(response) :
-            getLogin(response, props.currentLanguage));
+            mode: 'cors',
+            credentials: 'include'
+        }).then(response => response.status !== 200 && response.status !== 401 ? showError(response) : response.json())
+            .then(data => proccessLoginResult(data, props.currentLanguage))
+            .catch(err => console.error('Fetch or JSON error:', err));
 
     }
 

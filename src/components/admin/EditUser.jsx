@@ -4,8 +4,9 @@ import 'antd/dist/antd.css';
 import {Button, Form, Input, message, Select, Space} from 'antd';
 import {useHistory} from 'react-router-dom';
 import {showError} from './../../common/error-handler.jsx';
-import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
-import { useCookies } from 'react-cookie';
+import {getCSRFToken} from './../../common/csrf-resolver.jsx';
+import {useCookies} from 'react-cookie';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 const {TextArea} = Input;
 
@@ -91,27 +92,24 @@ const EditForm = (props) => {
             roles: userRole,
             language: localStorage.getItem("language"),
         }
-
-        fetch("/user/edit?is_name_changed=" + isNameChanged, {
-                        method: 'PUT',
-                        headers: {
-                            'X-XSRF-TOKEN': cookies.csrf,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(userObject)
-                    })
-                        .then(response => response.status != 200 ? showError(response) :
-                            response.json())
-                        .then(data => processUserEditinApiResponse(data, props.language))
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/user/edit?is_name_changed=' + isNameChanged, {
+            method: 'PUT',
+            headers: {
+                'X-XSRF-TOKEN': csrf,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(userObject)
+        })
+            .then(response => response.status != 200 ? showError(response) :
+                response.json())
+            .then(data => processUserEditinApiResponse(data, props.language))
     };
 
     useEffect(() => {
-        resolveCSRFToken()
-                    .then(token => setCookie('csrf', token, { path: '/' }))
-
-        fetch('/user/get-one/' + id)
+        fetch(API_BASE_URL + '/user/get-one/' + id, {credentials: 'include'})
             .then(response => response.status != 200 ? showError(response) : response.json())
             .then(data => setUserData(data));
     }, []);

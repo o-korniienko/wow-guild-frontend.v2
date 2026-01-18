@@ -1,9 +1,9 @@
 import 'antd/dist/antd.css';
-import { PageHeader, Select, Button, Descriptions } from 'antd';
-import React, { useState, useEffect} from 'react';
+import {Button, Descriptions, PageHeader, Select} from 'antd';
+import React, {useState} from 'react';
 import styled from 'styled-components'
-import  './NavBar.css';
-import { Link } from 'react-router-dom';
+import './NavBar.css';
+import {Link} from 'react-router-dom';
 import logo from './../logo/logo.jpg';
 import properties from './../../properties.js';
 

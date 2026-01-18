@@ -1,10 +1,9 @@
-import styled from 'styled-components';
-import { Button, Typography, Space, Divider} from 'antd';
+import {Space, Typography} from 'antd';
 import 'antd/dist/antd.css';
-import React, { useState, useEffect} from 'react';
-import  './Greeting.css';
+import React, {useState} from 'react';
+import './Greeting.css';
 import AppNavbar from './nav_bar/AppNavBar.jsx';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import properties from '../properties';
 
 const { Text, Title, Paragraph  } = Typography;

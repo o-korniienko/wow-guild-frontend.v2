@@ -1,23 +1,13 @@
-import AppNavbar from './../nav_bar/GeneralNavBar.jsx';
-import { Table, Form, Select, Space, Button, Popconfirm,Typography, Menu, message, Layout, Input, Spin, Modal, Alert, Card, Col, Row, Pagination, List, Affix} from 'antd';
+import {Card, Form, Input, Layout, Select, Table, Typography} from 'antd';
 import 'antd/dist/antd.css';
-import  './MembersStyle.css';
+import './MembersStyle.css';
 import styled from 'styled-components'
-import {
-  PlusCircleOutlined,
-  SyncOutlined,
-  BarChartOutlined,
-  ReloadOutlined,
-  MinusOutlined,
-  PlusOutlined
-} from '@ant-design/icons';
-import React, { useState, useEffect } from 'react';
+import {MinusOutlined, PlusOutlined} from '@ant-design/icons';
+import React, {useEffect, useState} from 'react';
 import Cookies from 'universal-cookie';
-import { Link } from 'react-router-dom';
-import wowLogo from './../logo/wow.png';
-import wowLogsLogo from './../logo/wowLogs.png';
-import RaiderIo from './../logo/raiderIo.png';
 import {showError, showErrorAndSetFalse} from './../../common/error-handler.jsx';
+import {API_BASE_URL} from "../../constants/apiConstants";
+import {getCSRFToken} from "../../common/csrf-resolver";
 
 const { Search } = Input;
 const { Sider, Content } = Layout;
@@ -408,12 +398,12 @@ function MainContent (props){
         setMetricText("dps");
         setDifficultyText("5");
 
-        fetch('/user/get-active')
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
             .then(response=> response.status !== 200 ? showErrorAndSetFalse(response, setLoading) :
                 response.url.includes("login_in") ? window.location.href = "/login_in" : response.json())
             .then(data=>setUserData(data));
 
-        fetch('/boss/get-all', {})
+        fetch(API_BASE_URL + '/boss/get-all', {credentials: 'include'})
             .then(response => response.status !== 200 ? showError(response) : response.json())
             .then(data => setRaidsData(data, true))
 
@@ -432,11 +422,11 @@ function MainContent (props){
             difficulty:difficulty,
             metric:metric
         }
-
-        fetch('/member/get-all-ranked-by', {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/member/get-all-ranked-by', {
             method: 'POST',
             headers: {
-                'X-XSRF-TOKEN': props.cookies.csrf,
+                'X-XSRF-TOKEN': csrf,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },

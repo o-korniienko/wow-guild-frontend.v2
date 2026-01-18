@@ -6,6 +6,7 @@ import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import logo from './../logo/logo.jpg';
 import properties from './../../properties.js';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 const {Option} = Select;
 const guildName = properties.guildName
@@ -63,11 +64,11 @@ function NavBar(props) {
     const [logoText, setLogoText] = useState(null);
     const [language, setLanguage] = useState(null);
     const StyledPageHeader = styled(PageHeader)`
-      position: relative;
-      height: 30%;
-      minWidth: 100%;
-      border: 1px solid rgb(0, 0, 0);
-      background-color: rgb(0, 0, 0);
+        position: relative;
+        height: 30%;
+        minWidth: 100%;
+        border: 1px solid rgb(0, 0, 0);
+        background-color: rgb(0, 0, 0);
     `
 
     const setData = (data) => {
@@ -81,10 +82,10 @@ function NavBar(props) {
         }
     }
     useEffect(() => {
-        fetch("/user/get-active")
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
             .then(response => {
                 try {
-                    if (response.ok){
+                    if (response.ok) {
                         return response.json()
                     }
                     return null
@@ -94,8 +95,6 @@ function NavBar(props) {
                 }
             })
             .then(data => setData(data));
-
-
     }, []);
 
     if (user !== null) {

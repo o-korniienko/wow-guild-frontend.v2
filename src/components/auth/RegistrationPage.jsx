@@ -5,6 +5,7 @@ import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 import './Auth.css';
 import {showError} from './../../common/error-handler.jsx';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 
 let language = localStorage.getItem("language") != null ? localStorage.getItem("language") : "EN";
@@ -60,7 +61,7 @@ const RegistrationForm = (props) => {
             pass:password,
             language:language
         }
-        fetch('/user/registration', {
+        fetch(API_BASE_URL + '/user/registration', {
             method: 'POST',
             mode: 'cors',
             headers: {

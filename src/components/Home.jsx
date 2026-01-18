@@ -1,16 +1,13 @@
-import AppNavbar from './nav_bar/AppNavBar.jsx';
 import GreetingPage from './GreetingPage.jsx';
-import { Button, Input } from 'antd';
 import 'antd/dist/antd.css';
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import React, {useEffect, useState} from 'react';
+import {API_BASE_URL} from "../constants/apiConstants";
 
 function Home (){
      const [user, setUser] = useState(null);
 
      useEffect(() => {
-        fetch("/user/get-active")
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
         .then(response => {
             try {
                 if (response.ok){

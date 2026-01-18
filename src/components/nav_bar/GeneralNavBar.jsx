@@ -8,8 +8,9 @@ import {ArrowLeftOutlined, UserOutlined} from '@ant-design/icons';
 import logo from './../logo/logo.jpg';
 import properties from './../../properties.js';
 import {showError} from './../../common/error-handler.jsx';
-import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
-import { useCookies } from 'react-cookie';
+import {getCSRFToken} from './../../common/csrf-resolver.jsx';
+import {useCookies} from 'react-cookie';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 const {Option} = Select;
 const guildName = properties.guildName
@@ -37,23 +38,24 @@ const Language = (props) => {
 
 
     const setLanguage = (value) => {
-        fetch('/user/update-language?language=' + value, {
-                        method: 'POST',
-                        headers: {
-                            'X-XSRF-TOKEN': props.cookies.csrf,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include'
-                    }).then(response => response.status != 200 ? showError(response) :
-                        response.json()).then(data => checkLanguageChangeApiResponse(data));
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/user/update-language?language=' + value, {
+            method: 'POST',
+            headers: {
+                'X-XSRF-TOKEN': csrf,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        }).then(response => response.status != 200 ? showError(response) :
+            response.json()).then(data => checkLanguageChangeApiResponse(data));
     }
 
-    const checkLanguageChangeApiResponse = (data) =>{
-        if (data !== null && data !== undefined){
-            if (data.message === 'Success'){
+    const checkLanguageChangeApiResponse = (data) => {
+        if (data !== null && data !== undefined) {
+            if (data.message === 'Success') {
                 UpdateData(data.data)
-            }else{
+            } else {
                 message.error(data.message)
             }
         }
@@ -80,10 +82,11 @@ const getLogOut = () => {
 
 const BackIcon = () => {
     const StyledBackIcon = styled(ArrowLeftOutlined)`
-        color:#cd641b;
+        color: #cd641b;
+
         &:hover {
-          color:#1273de;
-          }
+            color: #1273de;
+        }
     `
     return <StyledBackIcon/>
 
@@ -105,11 +108,12 @@ const Logo = (props) => {
     )
 }
 
-const LogOut = (cookies) => {
-    fetch('/logout', {
+const LogOut = () => {
+    let csrf = getCSRFToken()
+    fetch(API_BASE_URL + '/logout', {
         method: 'POST',
         headers: {
-            'X-XSRF-TOKEN': cookies.csrf,
+            'X-XSRF-TOKEN': csrf,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
@@ -130,12 +134,12 @@ function UserButton(props) {
     }
 
     const StyledUserButton = styled(Button)`
-    position:relative;
-    right:3%;
-    top:25%;
-    color:#248755;
-    font-family: "Trebuchet MS";
-    text-decoration: underline;`
+        position: relative;
+        right: 3%;
+        top: 25%;
+        color: #248755;
+        font-family: "Trebuchet MS";
+        text-decoration: underline;`
 
 
     return (<StyledUserButton type="link" title={props.userTittle}>
@@ -151,12 +155,12 @@ function UserButton(props) {
 
 const LogOutButton = (props) => {
     const StyledLogOutButton = styled(Button)`
-    position:relative;
-    right:3%;
-    top:25%;
-    color:#248755;
-    font-family: "Trebuchet MS";
-    text-decoration: underline;`
+        position: relative;
+        right: 3%;
+        top: 25%;
+        color: #248755;
+        font-family: "Trebuchet MS";
+        text-decoration: underline;`
 
     let language = props.language;
     if (language === "UA") {
@@ -170,7 +174,7 @@ const LogOutButton = (props) => {
     }
 
     return (
-        <StyledLogOutButton type="link"><Link onClick={() => LogOut(props.cookies)}>
+        <StyledLogOutButton type="link"><Link onClick={() => LogOut()}>
             {props.logOutText}</Link>
         </StyledLogOutButton>
     )
@@ -181,12 +185,12 @@ const LogOutButton = (props) => {
 const ChatButton = (props) => {
 
     const StyledChatButton = styled(Button)`
-    position:relative;
-    right:8%;
-    top:25%;
-    color:#248755;
-    font-family: "Trebuchet MS";
-    text-decoration: underline;`
+        position: relative;
+        right: 8%;
+        top: 25%;
+        color: #248755;
+        font-family: "Trebuchet MS";
+        text-decoration: underline;`
 
     let language = props.language;
     if (language === "UA") {
@@ -267,9 +271,9 @@ const Menu = (props) => {
     }
 
     const StyledLink = styled(Link)`
-      hover {
-        color: #54b1ed;
-      }
+        hover {
+            color: #54b1ed;
+        }
     `
 
     if (!isAdmin) {
@@ -339,11 +343,11 @@ function NavBar(props) {
 
 
     const StyledPageHeader = styled(PageHeader)`
-      position: relative;
-      height: 3%;
-      minWidth: 100%;
-      border: 1px solid rgb(0, 0, 0);
-      background-color: rgb(0, 0, 0);
+        position: relative;
+        height: 3%;
+        minWidth: 100%;
+        border: 1px solid rgb(0, 0, 0);
+        background-color: rgb(0, 0, 0);
     `
 
     const setData = (data) => {
@@ -360,10 +364,7 @@ function NavBar(props) {
     }
 
     useEffect(() => {
-        resolveCSRFToken()
-            .then(token => setCookie('csrf', token, { path: '/' }))
-
-        fetch("/user/get-active")
+        fetch(API_BASE_URL + '/user/get-active', {credentials: "include"})
             .then(response => {
                 try {
                     if (response.ok) {
@@ -372,10 +373,14 @@ function NavBar(props) {
                     return null
                 } catch (err) {
                     return null
-                    console.log(err)
+                    console.log("error occurred: " + err)
                 }
             })
-            .then(data => setData(data));
+            .then(data => setData(data))
+            .catch(err => {
+                console.log("error occurred: " + err)
+                setUser(null)
+            })
 
     }, []);
 
@@ -385,25 +390,25 @@ function NavBar(props) {
         return (<StyledPageHeader
             className="site-page-header"
             title=<Logo logoText={logoText} setLogoText={setLogoText} language={language}/>
-            extra = {
-                [
+        extra = {
+            [
                 <ChatButton language={language} chatText={chatText}
-                                          setChatText={setChatText}/>,
-                <UserButton key='0' {...user}
-                             userTittle={userTittle}
-                             setUserTittle={setUserTittle}
-                             language={language}
-                />,
-                <LogOutButton cookies={cookies} key='1'
+                            setChatText={setChatText}/>,
+        <UserButton key='0' {...user}
+                    userTittle={userTittle}
+                    setUserTittle={setUserTittle}
+                    language={language}
+        />,
+            <LogOutButton cookies={cookies} key='1'
                           logOutText={logOutText}
                           setLogOutText={setLogOutText}
                           language={language}
-                />,
-                <Language cookies={cookies} language={language} setLanguage={setLanguage}
-                          setFunction={props.setFunction}/>
-                ]
-            }
-        >
+            />,
+            <Language cookies={cookies} language={language} setLanguage={setLanguage}
+                      setFunction={props.setFunction}/>
+    ]
+    }
+    >
 
     <
         Menu

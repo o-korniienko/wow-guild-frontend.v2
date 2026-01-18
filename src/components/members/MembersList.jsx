@@ -1,11 +1,13 @@
-import {Card, Col, Input, List, message, Space} from 'antd';
+import {Card, Col, Input, List, Space} from 'antd';
 import './MembersStyle.css';
 import React, {useState} from 'react';
 import wowLogo from './../logo/wow.png';
 import wowLogsLogo from './../logo/wowLogs.png';
 import RaiderIo from './../logo/raiderIo.png';
 import {SyncOutlined} from '@ant-design/icons';
-import { showError, showErrorAndSetFalse} from './../../common/error-handler.jsx';
+import {showErrorAndSetFalse} from './../../common/error-handler.jsx';
+import {API_BASE_URL} from "../../constants/apiConstants";
+import {getCSRFToken} from "../../common/csrf-resolver";
 
 let SEARCH = ""
 
@@ -81,10 +83,11 @@ const MembersList = (props) => {
         if (mainDiv != null) {
             mainDiv.className = 'main_div_disabled';
         }
-        fetch('/member/update/' + id, {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/member/update/' + id, {
             method: 'POST',
             headers: {
-                'X-XSRF-TOKEN': props.cookies.csrf,
+                'X-XSRF-TOKEN': csrf,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -93,11 +96,6 @@ const MembersList = (props) => {
             .then(response => response.status !== 200 ? showErrorAndSetFalse(response, props.setLoading) :
                 response.url.includes("login_in") ? window.location.href = "/login_in" : response.json())
             .then(data => props.updateCharacterDataInTable(data, SEARCH));
-        /* setTimeout(function(){
-            props.setLoading(false)
-        }, 2000); */
-
-
     }
 
     const onSearch = value => {

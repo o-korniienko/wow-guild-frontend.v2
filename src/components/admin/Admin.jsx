@@ -2,10 +2,11 @@ import AppNavbar from './../nav_bar/GeneralNavBar.jsx';
 import {Button, Col, Input, Layout, message, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import 'antd/dist/antd.css';
 import React, {useEffect, useState} from 'react';
-import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
+import {getCSRFToken} from './../../common/csrf-resolver.jsx';
 import {useCookies} from 'react-cookie';
 import {Link} from 'react-router-dom';
 import {showError} from './../../common/error-handler.jsx';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 const {Search} = Input;
 const {Sider, Content} = Layout;
@@ -81,32 +82,25 @@ const UserList = (props) => {
     }
 
     useEffect(() => {
-        resolveCSRFToken()
-            .then(token => setCookie('csrf', token, {path: '/'}))
-
-        fetch('/user/get-all', {})
+        fetch(API_BASE_URL + '/user/get-all', {credentials: 'include'})
             .then(response => response.status != 200 ? showError(response) : response.json())
             .then(data => updateUsers2(data))
 
     }, []);
     const remove = (id) => {
-        resolveCSRFToken().then(token => {
-            if (token !== undefined && token !== null) {
-                fetch('/user/delete-one/' + id, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-XSRF-TOKEN': token,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/user/delete-one/' + id, {
+            method: 'DELETE',
+            headers: {
+                'X-XSRF-TOKEN': csrf,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
 
-                })
-                    .then(response => response.status != 200 ? showError(response) : response.json())
-                    .then(data => updateUsers(data));
-            }
-        });
-
+        })
+            .then(response => response.status != 200 ? showError(response) : response.json())
+            .then(data => updateUsers(data));
     };
 
     const onSearch = value => {
@@ -131,10 +125,11 @@ const UserList = (props) => {
 
     const testFunction = () => {
         console.log("test function")
-        fetch('/make_test/', {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/make_test/', {
             method: 'POST',
             headers: {
-                'X-XSRF-TOKEN': cookies.csrf,
+                'X-XSRF-TOKEN': csrf,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },

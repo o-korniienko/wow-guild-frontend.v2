@@ -6,8 +6,9 @@ import AppNavbarGeneral from './../nav_bar/GeneralNavBar.jsx';
 import AppNavbar from './../nav_bar/AppNavBar.jsx';
 import {CheckOutlined, CloseOutlined, EditOutlined} from '@ant-design/icons';
 import {showError} from './../../common/error-handler.jsx';
-import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
-import { useCookies } from 'react-cookie';
+import {getCSRFToken} from './../../common/csrf-resolver.jsx';
+import {useCookies} from 'react-cookie';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 const {Text, Title, Paragraph} = Typography;
 const {TextArea} = Input;
@@ -97,10 +98,11 @@ const Content = (props) => {
             tag: tag,
             message: text,
         }
-        fetch('/info/update-message-by-tag', {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/info/update-message-by-tag', {
                     method: 'POST',
                     headers: {
-                        'X-XSRF-TOKEN': cookies.csrf,
+                        'X-XSRF-TOKEN': csrf,
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -224,14 +226,11 @@ const Content = (props) => {
     }
 
     useEffect(() => {
-        resolveCSRFToken()
-                    .then(token => setCookie('csrf', token, { path: '/' }))
-
-        fetch('/user/get-active', {})
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
             .then(response=> response.status !== 200 ? showError(response) : response.json())
             .then(data => setUserData(data));
 
-        fetch('/info/get-about-guild-messages', {})
+        fetch(API_BASE_URL + '/info/get-about-guild-messages', {credentials: 'include'})
             .then(response => response.status !== 200 ? showError(response) : response.json())
             .then(data => setData(data));
     }, []);
@@ -309,7 +308,7 @@ const Main = () => {
     }
 
     useEffect(() => {
-        fetch('/user/get-active', {})
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
             .then(response=> response.status !== 200 ? showError(response) : response.json())
             .then(data => setData(data));
     }, []);

@@ -1,22 +1,18 @@
-import styled from 'styled-components';
-import { Button, Typography, Space, Divider} from 'antd';
 import 'antd/dist/antd.css';
-import React, { useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import AppNavbar from './../nav_bar/GeneralNavBar.jsx';
-import { Link } from 'react-router-dom';
 import SockJS from 'sockjs-client';
-import { Stomp, Client } from '@stomp/stompjs';
+import {Stomp} from '@stomp/stompjs';
 import './Chat.css';
 import {showError} from './../../common/error-handler.jsx';
-import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
-import { useCookies } from 'react-cookie';
+import {getCSRFToken} from './../../common/csrf-resolver.jsx';
+import {useCookies} from 'react-cookie';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 let language = localStorage.getItem("language") != null ? localStorage.getItem("language") : "EN";
 
 
-
-
-const SimpleChat =  () =>{
+const SimpleChat = () => {
     const [currentLanguage, setLanguage] = useState(language);
     const [user, setUser] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -24,34 +20,35 @@ const SimpleChat =  () =>{
     const [cookies, setCookie] = useCookies(['csrf']);
 
     const handleSend = () => {
-      if (input.trim() !== '') {
-        let newMessage = {
-            message: input,
-            userId: user.id,
-            userName: user.username
+        if (input.trim() !== '') {
+            let newMessage = {
+                message: input,
+                userId: user.id,
+                userName: user.username
+            }
+            let csrf = getCSRFToken()
+            fetch(API_BASE_URL + '/simple-chat/message/send', {
+                method: 'POST',
+                headers: {
+                    'X-XSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(newMessage)
+            })
+                .then(response => response.status !== 200 ? showError(response) :
+                    response.json())
+                .then(data => processMessageSendResponse(data));
         }
-        fetch('/simple-chat/message/send', {
-            method: 'POST',
-            headers: {
-                'X-XSRF-TOKEN': cookies.csrf,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(newMessage)
-        })
-        .then(response => response.status !== 200 ? showError(response) :
-           response.json())
-        .then(data => processMessageSendResponse(data));
-      }
     };
 
     const processMessageSendResponse = (data) => {
-        if(data !== null && data !== undefined && data.status === 200){
+        if (data !== null && data !== undefined && data.status === 200) {
             let messageItem = {
-                id:data.data.id,
-                text:data.data.message,
-                sender:'user',
+                id: data.data.id,
+                text: data.data.message,
+                sender: 'user',
                 userName: data.data.userName
             }
             setMessages(prevMessages => [...prevMessages, messageItem])
@@ -60,33 +57,30 @@ const SimpleChat =  () =>{
     }
 
     const handleKeyPress = (e) => {
-      if (e.key === 'Enter') {
-        handleSend();
-      }
+        if (e.key === 'Enter') {
+            handleSend();
+        }
     };
 
-    const processWebSocketMessage = (message) =>{
+    const processWebSocketMessage = (message) => {
         if (message.body) {
-            if(message.body !== null && message.body !== undefined){
+            if (message.body !== null && message.body !== undefined) {
                 let newMessage = JSON.parse(message.body)
-              if(newMessage !== undefined && newMessage.data.userId.toString() !== user.id.toString()){
-                  let messageItem = {
-                      id:newMessage.data.id,
-                      text: newMessage.data.message,
-                      sender: 'other',
-                      userName: newMessage.data.userName
-                  }
-                  setMessages(prevMessages => [...prevMessages, messageItem])
-              }
+                if (newMessage !== undefined && newMessage.data.userId.toString() !== user.id.toString()) {
+                    let messageItem = {
+                        id: newMessage.data.id,
+                        text: newMessage.data.message,
+                        sender: 'other',
+                        userName: newMessage.data.userName
+                    }
+                    setMessages(prevMessages => [...prevMessages, messageItem])
+                }
             }
         }
     }
 
     useEffect(() => {
-        resolveCSRFToken()
-            .then(token => setCookie('csrf', token, { path: '/' }))
-
-        fetch('/user/get-active')
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
             .then(response => response.status !== 200 ? showError(response) : response.url.includes("login_in") ?
                 window.location.href = "/login_in" : response.json())
             .then(data => setUserData(data));
@@ -115,9 +109,9 @@ const SimpleChat =  () =>{
                 localStorage.setItem("language", user.language);
                 setLanguage(user.language);
 
-                fetch('/simple-chat/message/get-all', {})
-                     .then(response => response.status !== 200 ? showError(response) : response.json())
-                     .then(data => setMessagesData(data, user))
+                fetch(API_BASE_URL + '/simple-chat/message/get-all', {credentials: 'include'})
+                    .then(response => response.status !== 200 ? showError(response) : response.json())
+                    .then(data => setMessagesData(data, user))
             }
         } catch (err) {
             console.log(err)
@@ -125,11 +119,11 @@ const SimpleChat =  () =>{
     }
 
     const setMessagesData = (data, user) => {
-        if(data !== null && data.length > 0 && user !== null){
+        if (data !== null && data.length > 0 && user !== null) {
             let messageItems = []
-            for(let i = 0; i < data.length; i++){
+            for (let i = 0; i < data.length; i++) {
                 let message = {
-                    id:data[i].id,
+                    id: data[i].id,
                     text: data[i].message,
                     sender: data[i].userId.toString() === user.id.toString() ? 'user' : 'other',
                     userName: data[i].userName
@@ -140,42 +134,42 @@ const SimpleChat =  () =>{
         }
     }
 
-    return(
+    return (
         <div>
             <AppNavbar setFunction={setLanguage}/>
-                <div className="chat-container">
-                  <div className="chat-messages">
+            <div className="chat-container">
+                <div className="chat-messages">
                     {messages.map((message, index) => (
-                      <div
-                        key={index}
-                        className={`chat-message ${message.sender === 'user' ? 'user' : 'other'}`}
-                      >
+                        <div
+                            key={index}
+                            className={`chat-message ${message.sender === 'user' ? 'user' : 'other'}`}
+                        >
                             <span className="chat-username">
                               [{message.userName}]
                             </span>
                             <span className="chat-text">
                               {message.text}
                             </span>
-                      </div>
+                        </div>
                     ))}
-                  </div>
-                  <div className="chat-input">
+                </div>
+                <div className="chat-input">
                     <input
-                      type="text"
-                      placeholder="Type your message..."
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={handleKeyPress}
+                        type="text"
+                        placeholder="Type your message..."
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyPress}
                     />
                     <button onClick={handleSend}>Send</button>
-                  </div>
                 </div>
+            </div>
         </div>
 
     )
 
 }
 
-export default function SimpleChatPage(){
+export default function SimpleChatPage() {
     return <SimpleChat/>
 }

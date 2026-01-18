@@ -1,15 +1,16 @@
 import AppNavbar from './../nav_bar/GeneralNavBar.jsx';
 import MembersList from './/MembersList.jsx';
 import Stars from './/Stars.jsx';
-import {Affix, Card, Input, Layout, Menu, message, Spin, Button} from 'antd';
+import {Affix, Button, Card, Input, Layout, Menu, message, Spin} from 'antd';
 import 'antd/dist/antd.css';
 import './MembersStyle.css';
-import {BarChartOutlined, SyncOutlined, TeamOutlined, UnorderedListOutlined} from '@ant-design/icons';
+import {BarChartOutlined, TeamOutlined, UnorderedListOutlined} from '@ant-design/icons';
 import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {showError, showErrorAndSetFalse} from './../../common/error-handler.jsx';
-import {resolveCSRFToken} from './../../common/csrf-resolver.jsx';
-import { useCookies } from 'react-cookie';
+import {getCSRFToken} from './../../common/csrf-resolver.jsx';
+import {useCookies} from 'react-cookie';
+import {API_BASE_URL} from "../../constants/apiConstants";
 
 const {Search} = Input;
 const {Sider, Content} = Layout;
@@ -23,7 +24,7 @@ let languageLocal;
 
 
 function isAdmin(user) {
-    if(user !== null && user !== undefined){
+    if (user !== null && user !== undefined) {
         let roles = user.roles;
         for (var i = 0; i < roles.length; i++) {
             if (roles[i] === "ADMIN") {
@@ -114,7 +115,7 @@ const MenuComponent = (props) => {
     const proccessError = (response, mainDiv) => {
         showErrorAndSetFalse(response, props.setLoading);
 
-        if (mainDiv !== null && mainDiv !== undefined){
+        if (mainDiv !== null && mainDiv !== undefined) {
             mainDiv.className = 'main_div_enabled';
         }
     }
@@ -126,11 +127,11 @@ const MenuComponent = (props) => {
         if (mainDiv !== null && mainDiv !== undefined) {
             mainDiv.className = 'main_div_disabled';
         }
-
-        fetch('/member/update-all-bz', {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/member/update-all-bz', {
             method: 'POST',
             headers: {
-                'X-XSRF-TOKEN': props.cookies.csrf,
+                'X-XSRF-TOKEN': csrf,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -154,10 +155,11 @@ const MenuComponent = (props) => {
         if (mainDiv !== null && mainDiv !== undefined) {
             mainDiv.className = 'main_div_disabled';
         }
-        fetch('/member/update-all-rank', {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/member/update-all-rank', {
             method: 'POST',
             headers: {
-                'X-XSRF-TOKEN': props.cookies.csrf,
+                'X-XSRF-TOKEN': csrf,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -176,10 +178,11 @@ const MenuComponent = (props) => {
         if (mainDiv !== null && mainDiv !== undefined) {
             mainDiv.className = 'main_div_disabled';
         }
-        fetch('/raid/update-wow-logs-data', {
+        let csrf = getCSRFToken()
+        fetch(API_BASE_URL + '/raid/update-wow-logs-data', {
             method: 'POST',
             headers: {
-                'X-XSRF-TOKEN': props.cookies.csrf,
+                'X-XSRF-TOKEN': csrf,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -254,14 +257,14 @@ const MenuComponent = (props) => {
                             {listText}
                         </Link>
                     </Menu.Item>
-                    <Menu.Item style={{display:adminElementsDisplayStyle}} key="1" >
+                    <Menu.Item style={{display: adminElementsDisplayStyle}} key="1">
                         <Button type="link" style={{
                             color: hoverUpdateAll ? '#1e7ce4' : '#1a854f',
-                            fontSize: '100%', size:'50%'
+                            fontSize: '100%', size: '50%'
                         }}
-                              onClick={updateMembersFromBlizzard}
-                              onMouseEnter={() => handleMouseEnter(2)}
-                              onMouseLeave={() => handleMouseLeave(2)}
+                                onClick={updateMembersFromBlizzard}
+                                onMouseEnter={() => handleMouseEnter(2)}
+                                onMouseLeave={() => handleMouseLeave(2)}
                         >
                             {updateText}
                         </Button>
@@ -281,26 +284,26 @@ const MenuComponent = (props) => {
                                 {starsText}
                             </Link>
                         </Menu.Item>
-                        <Menu.Item style={{display:adminElementsDisplayStyle}} key="3">
+                        <Menu.Item style={{display: adminElementsDisplayStyle}} key="3">
                             <Button type="link" style={{
                                 color: hoverUpdateLogAll ? '#1e7ce4' : '#1a854f',
                                 fontSize: '100%'
                             }}
-                                  onClick={updateRankingData}
-                                  onMouseEnter={() => handleMouseEnter(4)}
-                                  onMouseLeave={() => handleMouseLeave(4)}
+                                    onClick={updateRankingData}
+                                    onMouseEnter={() => handleMouseEnter(4)}
+                                    onMouseLeave={() => handleMouseLeave(4)}
                             >
                                 {updateRankText}
                             </Button>
                         </Menu.Item>
-                        <Menu.Item style={{display:adminElementsDisplayStyle}} key="4">
+                        <Menu.Item style={{display: adminElementsDisplayStyle}} key="4">
                             <Button type="link" style={{
                                 color: hoverUpdateWowLogsRaidData ? '#1e7ce4' : '#1a854f',
                                 fontSize: '100%'
                             }}
-                                  onClick={updateWowLogsRaidsData}
-                                  onMouseEnter={() => handleMouseEnter(5)}
-                                  onMouseLeave={() => handleMouseLeave(5)}
+                                    onClick={updateWowLogsRaidsData}
+                                    onMouseEnter={() => handleMouseEnter(5)}
+                                    onMouseLeave={() => handleMouseLeave(5)}
                             >
                                 {updateRaidsDataText}
                             </Button>
@@ -386,14 +389,11 @@ function Members(props) {
     useEffect(() => {
         setLoading(true)
 
-        resolveCSRFToken()
-            .then(token => setCookie('csrf', token, { path: '/' }))
-
-        fetch('/user/get-active')
+        fetch(API_BASE_URL + '/user/get-active', {credentials: 'include'})
             .then(response => response.status !== 200 ? showErrorAndSetFalse(response, setLoading) : response.url.includes("login_in") ? window.location.href = "/login_in" : response.json())
             .then(data => setUserData(data));
 
-        fetch('/member/get-all', {})
+        fetch(API_BASE_URL + '/member/get-all', {credentials: 'include'})
             .then(response => response.status !== 200 ? showError(response) : response.json())
             .then(data => setBzData(data))
 
